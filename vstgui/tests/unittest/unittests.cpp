@@ -34,9 +34,12 @@ static void printf (const char* fmt, ...)
 	auto buffer = new char[numBytes];
 	if (vsnprintf (buffer, numBytes, fmt, args) > 0)
 	{
+		// PIN: 11.04.2020: disabled the OutputDebugStringA output since this doesn't work on Windows with MSYS2 gdb debugging
+		#ifdef _MSC_VER
 		if (IsDebuggerPresent ())
 			OutputDebugStringA (buffer);
 		else
+		#endif
 			::printf_s ("%s", buffer);
 	}
 

@@ -4,6 +4,9 @@
 
 #pragma once
 
+// PIN: 04.03.2020 - added stdint
+#include <stdint.h>
+
 #include "optional.h"
 #include <algorithm>
 

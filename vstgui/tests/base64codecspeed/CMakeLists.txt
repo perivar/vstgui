@@ -17,6 +17,8 @@ target_link_libraries(${target}
 	${${target}_PLATFORM_LIBS}
 )
 
-vstgui_set_cxx_version(${target} 14)
+# PIN: 10.03.2020 - change version to 17
+vstgui_set_cxx_version(${target} 17)
+
 set_target_properties(${target} PROPERTIES ${APP_PROPERTIES} FOLDER Tests)
 target_compile_definitions(${target} ${VSTGUI_COMPILE_DEFINITIONS})

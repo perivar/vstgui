@@ -6,6 +6,8 @@
 
 #include "vstguibase.h"
 #include <functional>
+// PIN: added limits to support the missing numeric_limits
+#include <limits>
 
 namespace VSTGUI {
 

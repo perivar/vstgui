@@ -20,8 +20,11 @@
 #include <d2d1.h>
 #include <windowsx.h>
 
+// PIN: GCC toolchain doesn't support autolinking
+#ifdef _MSC_VER
 #pragma comment(lib, "Dwmapi.lib")
 #pragma comment(lib, "Comctl32.lib")
+#endif
 
 extern void* hInstance;
 

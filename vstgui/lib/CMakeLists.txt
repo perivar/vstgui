@@ -284,7 +284,8 @@ if(CMAKE_HOST_APPLE)
 endif()
 
 ##########################################################################################
-if(MSVC)
+# PIN: 04.03.2020 - check for MINGW in addition to MSVC
+if(MSVC OR MINGW)
     set(${target}_sources ${${target}_common_sources} ${${target}_win32_sources})
 endif()
 
@@ -298,7 +299,46 @@ endif()
 add_library(${target} STATIC ${${target}_sources})
 
 target_compile_definitions(${target} ${VSTGUI_COMPILE_DEFINITIONS})
-vstgui_set_cxx_version(${target} 11)
+
+# PIN: 10.03.2020 - change version to 17
+vstgui_set_cxx_version(${target} 17)
+
+# PIN: 06.04.2020 - add missing opengl libs
+if(MINGW)
+    # PIN: ensure that the find library also finds windows dll's 
+    # the standard find_library` command does no longer consider .dll files to be linkable libraries. 
+    # all dynamic link libraries are expected to provide separate .dll.a or .lib import libraries.
+    set(CMAKE_FIND_LIBRARY_SUFFIXES ".dll" ".dll.a" ".a" ".lib")
+
+    find_library(OPENGL32_FRAMEWORK opengl32 REQUIRED)              # OpenGL Library
+    find_library(GLU32_FRAMEWORK glu32 REQUIRED)                    # OpenGL Utility Library
+    find_library(DWMAPI_FRAMEWORK dwmapi REQUIRED)                  # Desktop Window Manager (DWM)
+    find_library(D2D1_FRAMEWORK d2d1 REQUIRED)                      # Direct2D library 
+    find_library(DWRITE_FRAMEWORK dwrite REQUIRED)                  # DirectX Typography Services
+    find_library(SHLWAPI_FRAMEWORK shlwapi REQUIRED)                # Shell Light-Weight Application Programming Interface 
+    find_library(WINDOWSCODECS_FRAMEWORK windowscodecs REQUIRED)
+
+    message(STATUS "Linking vstgui lib with opengl libraries: 
+        ${OPENGL32_FRAMEWORK}
+        ${GLU32_FRAMEWORK}
+        ${DWMAPI_FRAMEWORK}
+        ${D2D1_FRAMEWORK}
+        ${DWRITE_FRAMEWORK}
+        ${SHLWAPI_FRAMEWORK}
+        ${WINDOWSCODECS_FRAMEWORK}
+    " )
+
+    target_link_libraries(${target} PRIVATE 
+        ${OPENGL32_FRAMEWORK}       # win32openglview.cpp
+        ${GLU32_FRAMEWORK}          # win32openglview.cpp
+        ${DWMAPI_FRAMEWORK}         # win32dragging.cpp
+        ${D2D1_FRAMEWORK}           # win32support.cpp, win32application.cpp
+        ${DWRITE_FRAMEWORK}         # win32support.cpp, win32application.cpp
+        ${SHLWAPI_FRAMEWORK}        # win32support.cpp, win32frame.cpp
+        ${WINDOWSCODECS_FRAMEWORK}  # win32support.cpp
+    )
+endif()
+
 vstgui_source_group_by_folder(${target})
 
 if(LINUX)

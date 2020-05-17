@@ -25,7 +25,7 @@
 #include "win32openglview.h"
 #endif
 
-// windows libraries VSTGUI depends on
+// PIN: GCC toolchain doesn't support autolinking
 #ifdef _MSC_VER
 #pragma comment(lib, "Shlwapi.lib")
 #endif

@@ -7,7 +7,13 @@
 #include <deque>
 #include <memory>
 #include <mutex>
-#include <ppltasks.h>
+
+// PIN: 15.04.2020. TODO: Use Threading Building Blocks instead of ppltasks for async support, so that it can work in MINGW
+#ifdef _MSC_VER
+	#include <ppltasks.h>
+#else
+	// #include "tbb/task.h" // not yet implemented
+#endif
 
 //------------------------------------------------------------------------
 namespace VSTGUI {
@@ -81,6 +87,8 @@ void postAsyncMainTask (Async::Task&& t)
 	PostMessage (asyncMessageWindow, WM_USER_ASYNC, reinterpret_cast<WPARAM> (task), 0);
 }
 
+// PIN: 05.03.2020 - added a Task implementation that works in MINGW, keep the original implementation for MSVC
+#ifdef _MSC_VER
 //------------------------------------------------------------------------
 struct TaskWrapper : std::enable_shared_from_this<TaskWrapper>
 {
@@ -98,12 +106,60 @@ struct TaskWrapper : std::enable_shared_from_this<TaskWrapper>
 	Async::Task task;
 	std::shared_ptr<concurrency::task<void>> f;
 };
+#endif
 
 //------------------------------------------------------------------------
 } // Win32
 } // Platform
 
+// PIN: 05.03.2020 - added a Task implementation that works in MINGW
+#if defined(__MINGW32__)
 //------------------------------------------------------------------------
+namespace Async {
+
+//------------------------------------------------------------------------
+struct Queue
+{
+	void schedule (Task&& task)
+	{
+		// TODO: scheduling not implemented yet
+		task ();
+	}
+};
+
+//------------------------------------------------------------------------
+const QueuePtr& mainQueue ()
+{
+	static QueuePtr q = std::make_shared<Queue> ();
+	return q;
+}
+
+//------------------------------------------------------------------------
+const QueuePtr& backgroundQueue ()
+{
+	static QueuePtr q = std::make_shared<Queue> ();
+	return q;
+}
+
+//------------------------------------------------------------------------
+QueuePtr makeSerialQueue (const char* name)
+{
+	return std::make_shared<Queue> ();
+}
+
+//------------------------------------------------------------------------
+void schedule (QueuePtr queue, Task&& task)
+{
+	queue->schedule (std::move (task));
+}
+
+//------------------------------------------------------------------------
+} // Async
+#endif
+
+// PIN: This is the original async implementation that works in MSVC not MINGW
+//------------------------------------------------------------------------
+#ifdef _MSC_VER
 namespace Async {
 
 //------------------------------------------------------------------------
@@ -198,6 +254,9 @@ void schedule (QueuePtr queue, Task&& task)
 }
 
 //------------------------------------------------------------------------
+
 } // Async
+#endif
+
 } // Standalone
 } // VSTGUI

@@ -19,6 +19,7 @@
 #include "direct2d/d2dbitmap.h"
 #include "direct2d/d2dfont.h"
 
+// PIN: GCC toolchain doesn't support autolinking
 #ifdef _MSC_VER
 #pragma comment (lib,"windowscodecs.lib")
 #pragma comment (lib,"d2d1.lib")

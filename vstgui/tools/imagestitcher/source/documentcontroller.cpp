@@ -22,6 +22,9 @@
 #include "vstgui/uidescription/iuidescription.h"
 #include "vstgui/uidescription/uiattributes.h"
 
+// PIN: 11.04.2020 - added <cassert> to make sure this file compiles even if NDEBUG is defined
+#include <cassert>
+
 //------------------------------------------------------------------------
 namespace VSTGUI {
 namespace ImageStitcher {

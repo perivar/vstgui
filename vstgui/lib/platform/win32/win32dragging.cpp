@@ -12,6 +12,10 @@
 #include <dwmapi.h>
 #include <shlobj.h>
 
+// PIN: Added wincodec header file
+#include <wincodec.h>
+
+// PIN: GCC toolchain doesn't support autolinking
 #ifdef _MSC_VER
 #pragma comment(lib, "Dwmapi.lib")
 #endif
@@ -102,10 +106,19 @@ bool Win32DraggingSession::setBitmap (const SharedPointer<CBitmap>& bitmap, CPoi
 {
 	if (!dragBitmapWindow && bitmap)
 	{
-		dragBitmapWindow = std::make_unique<Win32DragBitmapWindow> (bitmap,
-		                                                            offset);
-		if (!mouseObserver)
-			mouseObserver = std::make_unique<Win32MouseObserverWhileDragging> ();
+		// PIN: 05.03.2020 - make_unique fails in MINGW
+		#if !defined(__MINGW32__)
+			dragBitmapWindow = std::make_unique<Win32DragBitmapWindow> (bitmap,
+																		offset);
+			if (!mouseObserver)
+				mouseObserver = std::make_unique<Win32MouseObserverWhileDragging> ();
+		#else
+			// PIN use unique_ptr in MINGW since make_unique fails
+			dragBitmapWindow = std::unique_ptr<Win32DragBitmapWindow> (new Win32DragBitmapWindow(bitmap, offset));
+			
+			if (!mouseObserver)
+				mouseObserver = std::unique_ptr<Win32MouseObserverWhileDragging> (new Win32MouseObserverWhileDragging());
+		#endif
 
 		mouseObserver->registerCallback ([&] () { dragBitmapWindow->mouseChanged (); });
 	}
@@ -122,8 +135,16 @@ bool Win32DraggingSession::doDrag (const DragDescription& dragDescription, const
 	auto lastCursor = frame->getLastSetCursor ();
 	frame->setMouseCursor (kCursorNotAllowed);
 
-	if (callback)
-		mouseObserver = std::make_unique<Win32MouseObserverWhileDragging> ();
+	if (callback) 
+	{
+		// PIN: 05.03.2020 - make_unique fails in MINGW
+		#if !defined(__MINGW32__)
+			mouseObserver = std::make_unique<Win32MouseObserverWhileDragging> ();
+		#else
+			// PIN use unique_ptr in MINGW since make_unique fails
+			mouseObserver = std::unique_ptr<Win32MouseObserverWhileDragging> (new Win32MouseObserverWhileDragging());
+		#endif
+	}
 
 	if (callback)
 	{

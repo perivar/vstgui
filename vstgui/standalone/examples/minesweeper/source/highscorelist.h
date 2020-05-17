@@ -9,6 +9,9 @@
 #include <array>
 #include <ctime>
 
+// PIN: 06.04.2020 - added <memory> to include shared_ptr
+#include <memory>
+
 //------------------------------------------------------------------------
 namespace VSTGUI {
 namespace Standalone {

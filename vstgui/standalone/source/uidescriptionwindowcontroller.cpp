@@ -1029,9 +1029,13 @@ bool WindowController::handleCommand (const Command& command)
 //------------------------------------------------------------------------
 IMenuBuilder* WindowController::getWindowMenuBuilder (const IWindow& window) const
 {
+	// PIN: TODO: don't know why I have to disable this in MINGW to avoid crashing
+	#if !defined(__MINGW32__)
 	if (auto menuBuilder = dynamicPtrCast<IMenuBuilder> (impl->customization))
 		return menuBuilder.get ();
-	return nullptr;
+	#else
+		return nullptr;
+	#endif
 }
 
 //------------------------------------------------------------------------

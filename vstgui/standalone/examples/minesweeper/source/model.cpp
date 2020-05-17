@@ -6,6 +6,9 @@
 #include <random>
 #include <cassert>
 
+// PIN: 06.04.2020 - added <algorithm> to include for_each
+#include <algorithm>
+
 //------------------------------------------------------------------------
 namespace VSTGUI {
 namespace Standalone {

@@ -6,8 +6,11 @@
 
 #if WINDOWS && VSTGUI_OPENGL_SUPPORT
 
+// PIN: GCC toolchain doesn't support autolinking
+#ifdef _MSC_VER
 #pragma comment (lib,"opengl32.lib")
 #pragma comment (lib,"glu32.lib")
+#endif
 
 #include "win32frame.h"
 #include "win32support.h"

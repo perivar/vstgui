@@ -99,11 +99,21 @@ if(CMAKE_HOST_APPLE)
 endif()
 
 ##########################################################################################
-if(MSVC)
+# PIN: 07.03.2020 - check for MINGW in addition to MSVC
+if(MSVC OR MINGW)
 	set(${target}_sources
 		${${target}_sources}
 		"${VSTGUI_TEST_BASE}lib/platform_helper_win32.cpp"
 		"${VSTGUI_TEST_BASE}../../vstgui_win32.cpp"
+	)
+endif()
+
+# PIN: 15.03.2020 - add libraries vstgui and the missing windows libraries
+if(MINGW)
+	set(${target}_PLATFORM_LIBS
+		"vstgui"
+		"windowscodecs"
+		"comctl32"
 	)
 endif()
 
@@ -129,7 +139,9 @@ target_link_libraries(${target}
 	${${target}_PLATFORM_LIBS}
 )
 
-vstgui_set_cxx_version(${target} 14)
+# PIN: 10.03.2020 - change version to 17
+vstgui_set_cxx_version(${target} 17)
+
 target_compile_definitions(${target} ${VSTGUI_COMPILE_DEFINITIONS} ENABLE_UNIT_TESTS=1 VSTGUI_LIVE_EDITING=1)
 vstgui_source_group_by_folder(${target})
 
@@ -158,8 +170,10 @@ if(CMAKE_HOST_APPLE)
       "--coverage"
     )
 
-    vstgui_set_cxx_version(${target} 14)
-    target_compile_definitions(${target} ${VSTGUI_COMPILE_DEFINITIONS} ENABLE_UNIT_TESTS=1 VSTGUI_LIVE_EDITING=1 VSTGUI_ENABLE_DEPRECATED_METHODS=0)
+	# PIN: 10.03.2020 - change version to 17
+	vstgui_set_cxx_version(${target} 17)
+
+	target_compile_definitions(${target} ${VSTGUI_COMPILE_DEFINITIONS} ENABLE_UNIT_TESTS=1 VSTGUI_LIVE_EDITING=1 VSTGUI_ENABLE_DEPRECATED_METHODS=0)
     vstgui_source_group_by_folder(${target})
     target_compile_options(${target} PUBLIC "--coverage")
     add_custom_command(TARGET ${target} POST_BUILD COMMAND "/usr/bin/ruby" "${CMAKE_CURRENT_SOURCE_DIR}/lcov/generate.rb" "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/vstgui.build/Debug/codecoverage.build/Objects-normal/x86_64" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${target}" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/coverage_output" VERBATIM)
